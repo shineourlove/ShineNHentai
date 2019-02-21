@@ -1,0 +1,22 @@
+package shineourlove.shine.com.shinenhentai.ui;
+
+import android.os.Bundle;
+import android.support.v4.app.Fragment;
+
+import shineourlove.shine.com.shinenhentai.api.BookApi;
+
+/**
+ * created by shineourlove on 2019/2/21
+ */
+public abstract class BaseFragment extends Fragment {
+    public BookApi bookApi;
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        bookApi = BookApi.getInstance();
+        init();
+    }
+
+    public abstract void init();
+}
