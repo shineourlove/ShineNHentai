@@ -4,6 +4,8 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.JsonReader;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,9 +21,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import shineourlove.shine.com.shinenhentai.R;
+import shineourlove.shine.com.shinenhentai.api.BookModel;
 import shineourlove.shine.com.shinenhentai.api.DataPostListener;
 import shineourlove.shine.com.shinenhentai.api.presenter.BaseGetPresenter;
 import shineourlove.shine.com.shinenhentai.ui.BaseFragment;
+import shineourlove.shine.com.shinenhentai.ui.adapter.BookPreviewAdapter;
 import shineourlove.shine.com.shinenhentai.utils.ShineUtils;
 
 /**
@@ -33,18 +37,20 @@ import shineourlove.shine.com.shinenhentai.utils.ShineUtils;
  * create an instance of this fragment.
  */
 public class HomeFragment extends BaseFragment implements DataPostListener {
-    // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
 
-    // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
 
+    RecyclerView rcvHomepage;
+
     private OnFragmentInteractionListener mListener;
     BaseGetPresenter baseGetPresenter;
-    int page;
+    int page = 1;
+    List<BookModel> bookModelList;
+    BookPreviewAdapter previewAdapter;
 
     public HomeFragment() {
         // Required empty public constructor
@@ -71,6 +77,7 @@ public class HomeFragment extends BaseFragment implements DataPostListener {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
@@ -80,18 +87,23 @@ public class HomeFragment extends BaseFragment implements DataPostListener {
     @Override
     public void init() {
 //        bookApi.getBook("https://nhentai.net/");
+        rcvHomepage = view.findViewById(R.id.rcv_homepage);
+
+        bookModelList = new ArrayList<>();
+        previewAdapter = new BookPreviewAdapter(getContext(), bookModelList);
+        rcvHomepage.setAdapter(previewAdapter);
+        rcvHomepage.setLayoutManager(new GridLayoutManager(getContext(), 2));
+
+        page = 1;
         baseGetPresenter = new BaseGetPresenter(this);
         baseGetPresenter.getData("?page=" + page);
     }
 
-
     @Override
-
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_home, container, false);
+    public int getLayoutResId() {
+        return R.layout.fragment_home;
     }
+
 
     // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {
@@ -119,15 +131,13 @@ public class HomeFragment extends BaseFragment implements DataPostListener {
 
     @Override
     public void onSuccess(Document document) {
-
         Elements scripts = document.getElementsByTag("script");
         Elements gallery = document.getElementsByClass("gallery");
 
-        if (gallery.first() != null) {
-            ShineUtils.logDebug("data_log", "first: " + gallery.first().html());
-            String tags = gallery.first().attr("data-tags").replace(' ', ',');
-            ShineUtils.logDebug("data_log", "tags: " + tags);
+        for (Element element : gallery) {
+            bookModelList.add(new BookModel(element));
         }
+        previewAdapter.notifyDataSetChanged();
 
         if (scripts.last() == null) {
             return;

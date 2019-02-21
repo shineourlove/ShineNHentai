@@ -2,13 +2,19 @@ package shineourlove.shine.com.shinenhentai.ui.adapter;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.support.v7.widget.AppCompatImageView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
+
+import com.bumptech.glide.Glide;
 
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import shineourlove.shine.com.shinenhentai.R;
 import shineourlove.shine.com.shinenhentai.api.BookModel;
 
@@ -16,6 +22,7 @@ import shineourlove.shine.com.shinenhentai.api.BookModel;
  * created by shineourlove on 2019/2/21
  */
 public class BookPreviewAdapter extends RecyclerView.Adapter<BookPreviewAdapter.BookHolder> {
+
     private Context context;
     private List<BookModel> bookList;
 
@@ -32,7 +39,9 @@ public class BookPreviewAdapter extends RecyclerView.Adapter<BookPreviewAdapter.
 
     @Override
     public void onBindViewHolder(@NonNull BookHolder bookHolder, int i) {
-
+        BookModel bookModel = bookList.get(i);
+        bookHolder.txtBookTitle.setText(bookModel.getTitle());
+        Glide.with(context).load(bookModel.getCover()).into(bookHolder.imgBookPreview);
     }
 
     @Override
@@ -41,8 +50,16 @@ public class BookPreviewAdapter extends RecyclerView.Adapter<BookPreviewAdapter.
     }
 
     class BookHolder extends RecyclerView.ViewHolder {
+        @BindView(R.id.img_book_preview)
+        AppCompatImageView imgBookPreview;
+        @BindView(R.id.txt_language)
+        TextView txtLanguage;
+        @BindView(R.id.txt_book_title)
+        TextView txtBookTitle;
+
         BookHolder(@NonNull View itemView) {
             super(itemView);
+            ButterKnife.bind(this,itemView);
         }
     }
 }
